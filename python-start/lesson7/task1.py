@@ -27,7 +27,7 @@ class Matrix:
             for j in range(len(matrix[i+1])):
                 if i == 0 and diag and diag_count < len(matrix[i]):
                     matrix[i+1][j] = matrix[i].copy()
-                    matrix[i+1][j][diag_count] = self.__init_elem
+                    matrix[i+1][j][diag_count] = uniform(dist[0], dist[1]) if randomize else self.__init_elem
                     diag_count += 1
                 else:
                     matrix[i+1][j] = matrix[i].copy()
@@ -48,6 +48,16 @@ class Matrix:
                 data = data[idx]
             data[dim[-1]] = value
             self.set_value(dim=dim[:-1], value=data)
+
+    def get_value(self, dim: [tuple, list]):
+            if len(dim) == len(self.size):
+                data = self.data
+                for idx in dim:
+                    data = data[idx]
+
+                return data
+            else:
+                return None
 
     def __update_dim(self, tmp_dim):
         back_count = 1
@@ -75,11 +85,8 @@ class Matrix:
         tmp_dim = [0 for _ in self.size]
         matrix = Matrix(size=self.size, init_elem=0)
         while tmp_dim[0] != self.size[0]:
-            tmp_data = self.data
-            tmp_other = other.data
-            for dim in tmp_dim:
-                tmp_data = tmp_data[dim]
-                tmp_other = tmp_other[dim]
+            tmp_data = self.get_value(dim=tmp_dim)
+            tmp_other = other.get_value(dim=tmp_dim)
 
             result = func(tmp_data, tmp_other)
             matrix.set_value(dim=tmp_dim, value=result)
@@ -95,13 +102,20 @@ class Matrix:
         if other.size == self.size:
             return self.__elem_calc(other, lambda x, y: x-y)
 
-    def __mul__(self, other):
-        pass
+            
+class DiagMatrix(Matrix):
+    def __init__(self, size: tuple, init_elem=1, randomize=False, dist=(0,1)):
+        super().__init__(size=size, randomize=randomize, dist=dist, init_elem=init_elem, diag=True)
 
 
 class SquareMatrix(Matrix):
     def __init__(self, size: int, randomize=False, dist=(0, 1), diag=False, init_elem=None):
         super().__init__(size=(size, size), randomize=randomize, dist=dist, diag=diag, init_elem=init_elem)
+
+
+class DiagSquareMatrix(SquareMatrix):
+    def __init__(self, size: int, randomize=False, dist=(0,1), init_elem=None):
+        super().__init__(size=size, randomize=randomize, dist=dist, init_elem=init_elem, diag=True)
 
 
 class E(Matrix):
@@ -115,13 +129,17 @@ class Zero(Matrix):
 
 
 if __name__ == "__main__":
-    e_1 = E(size=(2,2))
-    e_2 = E(size=(2,2))
-    # print(e_1, e_2)
-    e_3 = e_1 + e_2
-    print(e_3)
-    e_4 = E(size=(2,2))
-    e_4.set_value(dim=[1,0], value=3)
-    e_4.set_value(dim=[1,1], value=4)
+    # e_1 = E(size=(2, 2))
+    # e_2 = E(size=(2, 2))
+    # e_3 = e_1 + e_2
+    # print(e_3)
+    e_4 = E(size=(2, 2))
+    e_4.set_value(dim=(1, 0), value=3)
+    e_4.set_value(dim=(1, 1), value=4)
     print(e_4)
-    print(e_3 + e_4)
+    print(e_4.get_value(dim=(1, 1)))
+
+    # print(e_3 + e_4)
+
+    # e_5 = DiagSquareMatrix(size=5, init_elem=2)
+    # print(e_5)
